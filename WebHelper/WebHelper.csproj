@@ -50,6 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\Enums\Enums.cs" />
+    <Compile Include="WebHelperResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>WebHelperResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="WebHelper\Browser\WebHelper.cs" />
     <Compile Include="WebHelper\Changed\WebHelper.cs" />
     <Compile Include="WebHelper\Load\WebHelper.cs" />
@@ -60,8 +65,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ChromeDriver\" />
     <Folder Include="HtmlStorage\" />
+    <Folder Include="WebHelper\Header\" />
     <Folder Include="WebHelper\Update\" />
   </ItemGroup>
   <ItemGroup>
@@ -69,6 +74,17 @@
       <Project>{a6c7e362-8af3-4150-966d-7059de7f2ec1}</Project>
       <Name>FileHelper</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="WebHelperResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>WebHelperResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ChromeDriver\chromedriver.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
