@@ -65,9 +65,9 @@
     <Folder Include="WebHelper\Update\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FileHelperTool\FileHelperTool.csproj">
+    <ProjectReference Include="..\FileHelperTool\FileHelper.csproj">
       <Project>{a6c7e362-8af3-4150-966d-7059de7f2ec1}</Project>
-      <Name>FileHelperTool</Name>
+      <Name>FileHelper</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
