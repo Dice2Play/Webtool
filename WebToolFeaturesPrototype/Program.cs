@@ -8,39 +8,33 @@ using System.Net;
 using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using WebHelperTool;
 using HtmlAgilityPack;
+using MoreLinq;
 using WebHelperProject;
+using WebHelperProject.Model;
 
 
 namespace WebToolFeaturesPrototype
 {
     class Program
     {
-        private static List<SubscribedWebsite> subscribedWebsiteses;
+        private static List<SubscribedWebsite> subscribedWebsiteses = new List<SubscribedWebsite>();
 
 
         static void Main(string[] args)
         {
-
-            WebHelper.OpenWebPageInBrowser(new Uri("http://localhost:8080/"));
-
-
-
-            subscribedWebsiteses = new List<SubscribedWebsite>();
-
+            // Websites which program should check
             string[] websitesToSubscribeToo = new string[] { "https://www.nu.nl/",
                                                              "http://localhost:8080/" };
 
-            foreach (string url in websitesToSubscribeToo)
-            {
-                SubscribeToWebsite(new Uri(url));
-            }
-
-            var allTasks = subscribedWebsiteses.Select(x => x._checkForChangesTask).ToArray();
+            // Add to subscribe list and subscribe to event when page changes
+            websitesToSubscribeToo.ForEach(x => SubscribeToWebsite(new Uri(x)));
 
 
             // Wait for all check tasks to be finished
+            var allTasks = subscribedWebsiteses.Select(x => x._checkForChangesTask).ToArray();
             Task.WaitAll(allTasks);
             
         }
@@ -66,17 +60,17 @@ namespace WebToolFeaturesPrototype
         static void NotifyUserThatPageChanged(object obj,EventArgs e)
         {
             var changedWebsite = (SubscribedWebsite) obj;
-            var getReadFriendlyHostName = changedWebsite._url.Host.Split('.')[1];
+            var readFriendlyHostName = changedWebsite._uri.Host.Split('.')[1];
 
 
             // Print to console
-            Console.WriteLine($" [{DateTime.Now.ToString("HH:mm:ss")}] Page: {changedWebsite._url} changed!");
+            Console.WriteLine($" [{DateTime.Now.ToString("HH:mm:ss")}] Page: {changedWebsite._uri} changed!");
 
             // Save file
-            FileHelper.CRUD.CREATE_Help.SaveHTMLFile(changedWebsite.CurrentHtmlWebDocument, Path.Combine(Environment.CurrentDirectory, "HtmlStorage"), $"{getReadFriendlyHostName}.html");
+            FileHelper.CRUD.CREATE_Help.SaveHTMLFile(changedWebsite.CurrentWebSite._HtmlDocument, Path.Combine(Environment.CurrentDirectory, "HtmlStorage"), $"{readFriendlyHostName}.html");
 
             // Navigate to Uri
-            //var cookies = 
+            WebHelper.OpenWebPageInBrowser(changedWebsite._uri, changedWebsite.CurrentWebSite._WebResponse.Cookies.Cast<HttpCookie>().ToArray());
 
         }
 
@@ -87,14 +81,11 @@ namespace WebToolFeaturesPrototype
     public class SubscribedWebsite
     {
         #region private fields
-        // Website where class is subscribed too. (Will get updated when the website has changed(See HasPageChanged method))
-        private HtmlDocument _currentHtmlWebDocument;
-
-        // Response header. (Will get updated when the website has changed(See HasPageChanged method))
-        private HttpWebResponse _currentHttpWebResponse;
+        // Current website (Will get updated when the website has changed(See HasPageChanged method))
+        private WebSite _currentWebsite;
 
         // Url of subscribed website
-        public Uri _url { get; set; }
+        public Uri _uri { get; set; }
 
         // Task which checks for changes in webpage
         public Task _checkForChangesTask { get; set; }
@@ -109,13 +100,10 @@ namespace WebToolFeaturesPrototype
 
         #endregion
 
-        public SubscribedWebsite(Uri url)
+        public SubscribedWebsite(Uri uri)
         {
-            
-
-            this._url = url;
-            _currentHtmlWebDocument = WebHelper.ReturnContentOfPageHtmlDocument(url);
-            _currentHttpWebResponse = WebHelper.ReturnWebHttpWebResponse(url);
+            this._uri = uri;
+            _currentWebsite = WebHelper.ReturnWebSite(uri);
             _checkForChangesTask = new Task(() => HasPageChanged());
 
             // Start task
@@ -123,10 +111,10 @@ namespace WebToolFeaturesPrototype
         }
 
         #region public properties
-        public HtmlDocument CurrentHtmlWebDocument
+        public WebSite CurrentWebSite
         {
-            get { return _currentHtmlWebDocument; }
-            set { _currentHtmlWebDocument = value; }
+            get { return _currentWebsite; }
+            set { _currentWebsite = value; }
         }
     
         public bool runCheckForChangesTask
@@ -146,14 +134,20 @@ namespace WebToolFeaturesPrototype
             {
                 _checkForChangesTask.Wait(2000);
 
-                // Reload HtmlDocument and HttpWebResponse
-                var reloadedHtmlDocument = WebHelper.ReturnContentOfPageHtmlDocument(_url);
-                var reloadedHttpWebResponse = WebHelper.ReturnWebHttpWebResponse(_url);
+                // Reloaded website
+                var reloadedWebsite = WebHelper.ReturnWebSite(_uri);
+
+                // Set HtmlDocuments and WebResponse
+                var reloadedHttpWebResponse = reloadedWebsite._WebResponse;
+                var reloadedHtmlDocument = reloadedWebsite._HtmlDocument;
+
+                var currentHtmlWebDocument = _currentWebsite._HtmlDocument;
+                var currentHttpWebResponse = _currentWebsite._WebResponse;
 
                 // Check if page changed
-                bool hasWebSiteChanged = WebHelper.HasWebpageChanged(   _currentHtmlWebDocument,
+                bool hasWebSiteChanged = WebHelper.HasWebpageChanged(   currentHtmlWebDocument,
                                                                         reloadedHtmlDocument,
-                                                                        _currentHttpWebResponse,
+                                                                        currentHttpWebResponse,
                                                                         reloadedHttpWebResponse);
 
 
@@ -161,9 +155,8 @@ namespace WebToolFeaturesPrototype
 
                 if (hasWebSiteChanged)
                 {
-                    // Set updated webpage and webresponse
-                    _currentHtmlWebDocument = reloadedHtmlDocument;
-                    _currentHttpWebResponse = reloadedHttpWebResponse;
+                    // Set updated website
+                    _currentWebsite = reloadedWebsite;
 
                     // Notify Subscribers!
                     PageChanged.Invoke(this,EventArgs.Empty);
@@ -171,7 +164,7 @@ namespace WebToolFeaturesPrototype
 
                 else
                 {
-                    Debug.WriteLine($"URL {_url} hasn't changed.");
+                    Debug.WriteLine($"URL {_uri} hasn't changed.");
                 }
 
 
@@ -180,11 +173,6 @@ namespace WebToolFeaturesPrototype
 
         }
 
-        // Get reloaded version of htmlpage
-        private HtmlDocument ReturnReloadedPage()
-        {
-            return WebHelper.ReturnContentOfPageHtmlDocument(_url);
-        }
 
 
 
