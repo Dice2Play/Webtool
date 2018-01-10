@@ -68,11 +68,16 @@ namespace WebToolFeaturesPrototype
             var changedWebsite = (SubscribedWebsite) obj;
             var getReadFriendlyHostName = changedWebsite._url.Host.Split('.')[1];
 
+
+            // Print to console
             Console.WriteLine($" [{DateTime.Now.ToString("HH:mm:ss")}] Page: {changedWebsite._url} changed!");
 
-            
+            // Save file
+            FileHelper.CRUD.CREATE_Help.SaveHTMLFile(changedWebsite.CurrentHtmlWebDocument, Path.Combine(Environment.CurrentDirectory, "HtmlStorage"), $"{getReadFriendlyHostName}.html");
 
-            FileHelperTool.CRUD.CREATE_Help.SaveHTMLFile(changedWebsite.CurrentHtmlWebDocument, Path.Combine(Environment.CurrentDirectory, "HtmlStorage"), $"{getReadFriendlyHostName}.html");
+            // Navigate to Uri
+            //var cookies = 
+
         }
 
 

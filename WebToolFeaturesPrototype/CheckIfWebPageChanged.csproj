@@ -55,13 +55,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FileHelperTool\FileHelper.csproj">
+    <ProjectReference Include="..\..\FileHelper\FileHelperProject.csproj">
       <Project>{a6c7e362-8af3-4150-966d-7059de7f2ec1}</Project>
-      <Name>FileHelper</Name>
+      <Name>FileHelperProject</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WebHelper\WebHelper.csproj">
+    <ProjectReference Include="..\..\JSONHelper\JSONHelperProject.csproj">
+      <Project>{75c4963f-aba3-4bbc-8cfa-fb25aebf473c}</Project>
+      <Name>JSONHelperProject</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\WebHelper\WebHelperProject.csproj">
       <Project>{80478174-7980-45b5-a4d2-4923949495f2}</Project>
-      <Name>WebHelper</Name>
+      <Name>WebHelperProject</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
