@@ -66,11 +66,11 @@ namespace WebToolFeaturesPrototype
             // Print to console
             Console.WriteLine($" [{DateTime.Now.ToString("HH:mm:ss")}] Page: {changedWebsite._uri} changed!");
 
-            // Save file
-            FileHelper.CRUD.CREATE_Help.SaveHTMLFile(changedWebsite.CurrentWebSite._HtmlDocument, Path.Combine(Environment.CurrentDirectory, "HtmlStorage"), $"{readFriendlyHostName}.html");
+            // Save website
+            FileHelper.CRUD.CREATE_Help.SaveHTMLFile(changedWebsite.CurrentWebSite.HtmlDocument, Path.Combine(Environment.CurrentDirectory, "HtmlStorage"), $"{readFriendlyHostName}.html");
 
             // Navigate to Uri
-            WebHelper.OpenWebPageInBrowser(changedWebsite._uri, changedWebsite.CurrentWebSite._WebResponse.Cookies.Cast<HttpCookie>().ToArray());
+            WebHelper.OpenWebPageInBrowser(changedWebsite._uri, changedWebsite.CurrentWebSite.WebResponse.Cookies.Cast<HttpCookie>().ToArray());
 
         }
 
@@ -117,10 +117,20 @@ namespace WebToolFeaturesPrototype
             set { _currentWebsite = value; }
         }
     
-        public bool runCheckForChangesTask
+        public bool RunCheckForChangesTask
         {
             get { return _runCheckForChangesTask; }
             set { _runCheckForChangesTask = value; }
+        }
+
+        public HtmlDocument HtmlDocument
+        {
+            get { return _currentWebsite.HtmlDocument; }
+        }
+
+        public WebResponse WebResponse
+        {
+            get { return _currentWebsite.WebResponse; }
         }
 
         #endregion
@@ -138,11 +148,11 @@ namespace WebToolFeaturesPrototype
                 var reloadedWebsite = WebHelper.ReturnWebSite(_uri);
 
                 // Set HtmlDocuments and WebResponse
-                var reloadedHttpWebResponse = reloadedWebsite._WebResponse;
-                var reloadedHtmlDocument = reloadedWebsite._HtmlDocument;
+                var reloadedHttpWebResponse = reloadedWebsite.WebResponse;
+                var reloadedHtmlDocument = reloadedWebsite.HtmlDocument;
 
-                var currentHtmlWebDocument = _currentWebsite._HtmlDocument;
-                var currentHttpWebResponse = _currentWebsite._WebResponse;
+                var currentHtmlWebDocument = _currentWebsite.HtmlDocument;
+                var currentHttpWebResponse = _currentWebsite.WebResponse;
 
                 // Check if page changed
                 bool hasWebSiteChanged = WebHelper.HasWebpageChanged(   currentHtmlWebDocument,
